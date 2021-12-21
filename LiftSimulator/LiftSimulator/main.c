@@ -93,6 +93,19 @@ int main(void)
       {
         // Waiting for new floor request
 
+        // Check all buttons for inputs
+        // EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
+        ButtonType btn = CheckKeyEvent();
+        requestedElevatorPosition = ConvertButtonTypeToLiftPosType(btn);
+        if (btn != EmergencyButton && currentElevatorState != requestedElevatorPosition) {
+          if (btn > 8)
+          {
+            SetIndicatorFloorState(requestedElevatorPosition);
+          } else {
+            SetIndicatorElevatorState(requestedElevatorPosition);
+          }
+          state = CloseDoor;
+        }
         break;
       }
 
