@@ -46,18 +46,22 @@ StateMachineType  state = Uninitialized;
 LiftPosType       requestedElevatorPosition = None;
 LiftPosType       currentElevatorState = None;
 DirectionType     elevatorDirection = Down;
+SpeedType		      elevatorSpeed = Fast;
 
 
-/*******************************************************************************
+/*************************************************************** ****************
 ***  PRIVATE FUNCTIONS  ********************************************************
 *******************************************************************************/
+// Get higher speed if distance bigger, lower speed if distance shorter
+SpeedType GetSpeed (LiftPosType low, LiftPosType high);
+
 // Convert ButtonType to LiftPosType
 LiftPosType ConvertButtonTypeToLiftPosType (ButtonType button);
 
 // Check if buttons are pressed
 ButtonType CheckKeyEvent ();
 
-// Update the 7-Seg. display
+// Update the 7-Segment. display
 void UpdateDisplay (LiftPosType elevatorState);
 
 
@@ -71,30 +75,59 @@ int main(void)
 
   // Endless loop
   while(1)
-  {
+  {	  
+	  currentElevatorState = ReadElevatorState();
     // Handling state machine
     switch (state)
     {
       case Uninitialized:
-      {
+      {		
         // Lift position calibration to ground floor (Floor0)
-
+        if (currentElevatorState == Floor0)
+        {
+          SetDoorState(Open, Floor0);
+          state = Waiting;
+        }
+        CalibrateElevatorPosition();
         break;
       }
 
-
+      // Waiting for new floor request
       case Waiting:
-      {
-        // Waiting for new floor request
-
+      {        
+        // Check all buttons for inputs
+        // EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
+        ButtonType btn = CheckKeyEvent();
+        requestedElevatorPosition = ConvertButtonTypeToLiftPosType(btn);
+        if (btn != EmergencyButton && currentElevatorState != requestedElevatorPosition) {
+          if (btn > 8)
+          {
+            SetIndicatorFloorState(requestedElevatorPosition);
+          } else {
+            SetIndicatorElevatorState(requestedElevatorPosition);
+          }
+          state = CloseDoor;
+        }
         break;
       }
-
 
       case CloseDoor:
       {
         // Close the door and wait until the door is closed
-
+        SetDoorState(Closed, currentElevatorState);
+        if (ReadDoorState(currentElevatorState) == Closed) {
+          if (currentElevatorState != requestedElevatorPosition) {
+            if (requestedElevatorPosition < currentElevatorState)
+            {
+              elevatorDirection = Down;
+              elevatorSpeed = GetSpeed(requestedElevatorPosition, currentElevatorState);
+            } else {
+              elevatorDirection = Up;
+              elevatorSpeed = GetSpeed(currentElevatorState, requestedElevatorPosition);
+            }
+          }
+          state = MoveLift;
+        }
         break;
       }
 
@@ -102,15 +135,26 @@ int main(void)
       case MoveLift:
       {
         // Move cabin to the requested floor
-
+        if (currentElevatorState != requestedElevatorPosition) {			
+          if (requestedElevatorPosition < currentElevatorState)
+          {
+            MoveElevator(elevatorDirection, elevatorSpeed);
+          } else {
+            MoveElevator(elevatorDirection, elevatorSpeed);
+          }			
+        }
         break;
       }
-
 
       case OpenDoor:
       {
         // Open the door and wait still the door is open completely
-
+        ClrIndicatorFloorState(requestedElevatorPosition);
+        ClrIndicatorElevatorState(requestedElevatorPosition);
+        SetDoorState(Open, requestedElevatorPosition);
+        if (ReadDoorState(requestedElevatorPosition) == Open) {			
+          state = Waiting;
+        }
         break;
       }
 
@@ -133,6 +177,17 @@ int main(void)
 /*******************************************************************************
 ***  PRIVATE FUNCTIONs *********************************************************
 *******************************************************************************/
+// Get higher speed if distance bigger, lower speed if distance shorter
+SpeedType GetSpeed (LiftPosType low, LiftPosType high) {
+	if (high - low > 2) {
+		return Fast;
+	} else if (high - low > 1) {
+		return Medium;
+	} else {
+		return Slow;
+	}
+}
+
 // Convert ButtonType to LiftPosType
 LiftPosType ConvertButtonTypeToLiftPosType (ButtonType button)
 {
