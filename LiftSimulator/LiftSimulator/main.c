@@ -113,7 +113,17 @@ int main(void)
       case CloseDoor:
       {
         // Close the door and wait until the door is closed
-
+        SetDoorState(Closed, currentElevatorState);
+        if (ReadDoorState(currentElevatorState) == Closed) {
+          if (currentElevatorState != requestedElevatorPosition) {
+            if (requestedElevatorPosition < currentElevatorState)
+            {
+              elevatorDirection = Down;
+            } else {
+              elevatorDirection = Up;
+            }
+          }
+        }
         break;
       }
 
