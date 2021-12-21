@@ -123,6 +123,7 @@ int main(void)
               elevatorDirection = Up;
             }
           }
+          state = MoveLift;
         }
         break;
       }
@@ -131,7 +132,14 @@ int main(void)
       case MoveLift:
       {
         // Move cabin to the requested floor
-
+        if (currentElevatorState != requestedElevatorPosition) {			
+          if (requestedElevatorPosition < currentElevatorState)
+          {
+            MoveElevator(elevatorDirection, elevatorSpeed);
+          } else {
+            MoveElevator(elevatorDirection, elevatorSpeed);
+          }			
+        }
         break;
       }
 
