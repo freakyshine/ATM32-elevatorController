@@ -72,13 +72,19 @@ int main(void)
   // Endless loop
   while(1)
   {
+	currentElevatorState = ReadElevatorState();
     // Handling state machine
     switch (state)
     {
       case Uninitialized:
       {
         // Lift position calibration to ground floor (Floor0)
-
+        if (currentElevatorState == Floor0)
+        {
+          SetDoorState(Open, Floor0);
+          state = Waiting;
+        }
+        CalibrateElevatorPosition();
         break;
       }
 
