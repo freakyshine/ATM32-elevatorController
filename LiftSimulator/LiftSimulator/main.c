@@ -48,7 +48,7 @@ LiftPosType       currentElevatorState = None;
 DirectionType     elevatorDirection = Down;
 
 
-/*******************************************************************************
+/*************************************************************** ****************
 ***  PRIVATE FUNCTIONS  ********************************************************
 *******************************************************************************/
 // Convert ButtonType to LiftPosType
@@ -57,7 +57,7 @@ LiftPosType ConvertButtonTypeToLiftPosType (ButtonType button);
 // Check if buttons are pressed
 ButtonType CheckKeyEvent ();
 
-// Update the 7-Seg. display
+// Update the 7-Segment. display
 void UpdateDisplay (LiftPosType elevatorState);
 
 
@@ -82,7 +82,7 @@ int main(void)
         break;
       }
 
-
+      // Waiting for new floor request
       case Waiting:
       {
         // Waiting for new floor request
