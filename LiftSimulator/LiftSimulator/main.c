@@ -147,7 +147,12 @@ int main(void)
       case OpenDoor:
       {
         // Open the door and wait still the door is open completely
-
+        ClrIndicatorFloorState(requestedElevatorPosition);
+        ClrIndicatorElevatorState(requestedElevatorPosition);
+        SetDoorState(Open, requestedElevatorPosition);
+        if (ReadDoorState(requestedElevatorPosition) == Open) {			
+          state = Waiting;
+        }
         break;
       }
 
