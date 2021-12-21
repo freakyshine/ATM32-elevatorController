@@ -46,11 +46,15 @@ StateMachineType  state = Uninitialized;
 LiftPosType       requestedElevatorPosition = None;
 LiftPosType       currentElevatorState = None;
 DirectionType     elevatorDirection = Down;
+SpeedType		      elevatorSpeed = Fast;
 
 
 /*************************************************************** ****************
 ***  PRIVATE FUNCTIONS  ********************************************************
 *******************************************************************************/
+// Get higher speed if distance bigger, lower speed if distance shorter
+SpeedType GetSpeed (LiftPosType low, LiftPosType high);
+
 // Convert ButtonType to LiftPosType
 LiftPosType ConvertButtonTypeToLiftPosType (ButtonType button);
 
@@ -119,8 +123,10 @@ int main(void)
             if (requestedElevatorPosition < currentElevatorState)
             {
               elevatorDirection = Down;
+              elevatorSpeed = GetSpeed(requestedElevatorPosition, currentElevatorState);
             } else {
               elevatorDirection = Up;
+              elevatorSpeed = GetSpeed(currentElevatorState, requestedElevatorPosition);
             }
           }
           state = MoveLift;
@@ -175,6 +181,17 @@ int main(void)
 /*******************************************************************************
 ***  PRIVATE FUNCTIONs *********************************************************
 *******************************************************************************/
+// Get higher speed if distance bigger, lower speed if distance shorter
+SpeedType GetSpeed (LiftPosType low, LiftPosType high) {
+	if (high - low > 2) {
+		return Fast;
+	} else if (high - low > 1) {
+		return Medium;
+	} else {
+		return Slow;
+	}
+}
+
 // Convert ButtonType to LiftPosType
 LiftPosType ConvertButtonTypeToLiftPosType (ButtonType button)
 {
