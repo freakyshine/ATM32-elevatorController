@@ -75,13 +75,13 @@ int main(void)
 
   // Endless loop
   while(1)
-  {
-	currentElevatorState = ReadElevatorState();
+  {	  
+	  currentElevatorState = ReadElevatorState();
     // Handling state machine
     switch (state)
     {
       case Uninitialized:
-      {
+      {		
         // Lift position calibration to ground floor (Floor0)
         if (currentElevatorState == Floor0)
         {
@@ -94,9 +94,7 @@ int main(void)
 
       // Waiting for new floor request
       case Waiting:
-      {
-        // Waiting for new floor request
-
+      {        
         // Check all buttons for inputs
         // EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
         ButtonType btn = CheckKeyEvent();
@@ -112,7 +110,6 @@ int main(void)
         }
         break;
       }
-
 
       case CloseDoor:
       {
@@ -148,7 +145,6 @@ int main(void)
         }
         break;
       }
-
 
       case OpenDoor:
       {
