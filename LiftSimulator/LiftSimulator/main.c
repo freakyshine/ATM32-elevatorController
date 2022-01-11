@@ -33,15 +33,9 @@
 /*** OWN DATA TYPES ***********************************************************/
 
 /*** CONSTANTS ****************************************************************/
-#define floorAmount 4
-#if floorAmount < 1
-#error "Amount of floors can't be zerom or less. floorAmount is "
-floorAmount
-#endif
 
 /*** INCLUDE FILES ************************************************************/
 #include "LiftLibrary/LiftLibrary.h" // lift model library
-
 
 /*** GLOBAL Variablen *********************************************************/
 StateMachineType state = Uninitialized;
@@ -49,7 +43,8 @@ LiftPosType requestedElevatorPosition = None;
 LiftPosType currentElevatorState = None;
 DirectionType elevatorDirection = Down;
 SpeedType elevatorSpeed = Fast;
-LiftPosType requestQueue[floorAmount] = { None };
+LiftPosType requestQueue[4] = { None, None, None, None };
+short queueSize = 0;
 
 /*************************************************************** ****************
  ***  PRIVATE FUNCTIONS  ********************************************************
