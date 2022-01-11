@@ -128,7 +128,7 @@ int main(void) {
         case MoveLift: {
             // Move cabin to the requested floor
             if (currentElevatorState != requestedElevatorPosition) {
-                    MoveElevator(elevatorDirection, elevatorSpeed);
+                MoveElevator(elevatorDirection, elevatorSpeed);
             } else {
                 state = OpenDoor;
             }
@@ -172,7 +172,7 @@ void CheckButtons () {
 		if (queueSize < 4) {
 			requestQueue[queueSize] = liftPosTypeBtn;
 			
-		if (btn > 8) {
+			if (btn > 8) {
 				SetIndicatorFloorState(liftPosTypeBtn);
 			}
 			else {
@@ -192,9 +192,9 @@ short CheckQueue (LiftPosType floor) {
 			duplicate++;
 			break;
 		}
-		}
-	return duplicate;
 	}
+	return duplicate;
+}
 
 // Shifts the queue to the left and replaces the last element with a placeholder / empty slot
 void ShiftQueue() {
@@ -209,10 +209,8 @@ void ShiftQueue() {
 SpeedType GetSpeed(LiftPosType low, LiftPosType high) {
     if (high - low > 2) {
         return Fast;
-    } else if (high - low > 1) {
+    }  else {
         return Medium;
-    } else {
-        return Slow;
     }
 }
 
