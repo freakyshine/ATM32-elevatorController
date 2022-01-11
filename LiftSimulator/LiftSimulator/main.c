@@ -61,6 +61,12 @@ ButtonType CheckKeyEvent();
 // Check Buttons for input, if present store to queue. As button is pressed, it will also light up the corresponding indicator
 void CheckButtons ();
 
+// Check Buttons for input, if present store to queue. As button is pressed, it will also light up the corresponding indicator
+short CheckQueue (LiftPosType floor);
+
+// Shifts the queue to the left and replaces the last element with a placeholder / empty slot
+void ShiftQueue();
+
 // Update the 7-Segment. display
 void UpdateDisplay(LiftPosType elevatorState);
 
@@ -74,9 +80,11 @@ int main(void) {
     // Endless loop
     while (1) {
         currentElevatorState = ReadElevatorState();
+        CheckButtons();
         // Handling state machine
         switch (state) {
         case Uninitialized: {
+			requestedElevatorPosition = Floor0;
             // Lift position calibration to ground floor (Floor0)
             if (currentElevatorState == Floor0) {
                 SetDoorState(Open, Floor0);
@@ -88,7 +96,14 @@ int main(void) {
 
         // Waiting for new floor request
         case Waiting: {
-            CheckButtons();
+			if (requestQueue[0] == currentElevatorState)
+			{
+				ShiftQueue();
+			}
+			else if (requestQueue[0] != None) {
+				requestedElevatorPosition = requestQueue[0];
+				state = CloseDoor;
+			}
             break;
         }
 
@@ -113,11 +128,7 @@ int main(void) {
         case MoveLift: {
             // Move cabin to the requested floor
             if (currentElevatorState != requestedElevatorPosition) {
-                if (requestedElevatorPosition < currentElevatorState) {
                     MoveElevator(elevatorDirection, elevatorSpeed);
-                } else {
-                    MoveElevator(elevatorDirection, elevatorSpeed);
-                }
             } else {
                 state = OpenDoor;
             }
@@ -155,15 +166,43 @@ int main(void) {
 void CheckButtons () {
 	// EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
 	ButtonType btn = CheckKeyEvent();
-	requestedElevatorPosition = ConvertButtonTypeToLiftPosType(btn); // TODO: store to queue instead (another method)
-	if (btn != EmergencyButton && currentElevatorState != requestedElevatorPosition) {
+	LiftPosType liftPosTypeBtn = ConvertButtonTypeToLiftPosType(btn);
+	
+	if (btn != EmergencyButton && currentElevatorState != liftPosTypeBtn && CheckQueue(liftPosTypeBtn) == 0) {
+		if (queueSize < 4) {
+			requestQueue[queueSize] = liftPosTypeBtn;
+			
 		if (btn > 8) {
-			SetIndicatorFloorState(requestedElevatorPosition);
-			} else {
-			SetIndicatorElevatorState(requestedElevatorPosition);
+				SetIndicatorFloorState(liftPosTypeBtn);
+			}
+			else {
+				SetIndicatorElevatorState(liftPosTypeBtn);
+			}
+			
+			queueSize++;
 		}
-		state = CloseDoor;
 	}
+}
+
+// Check if element is present in queue
+short CheckQueue (LiftPosType floor) {
+	short duplicate = 0;
+	for (int i = 0; i < 4; i++) {
+		if (requestQueue[i] == floor) {
+			duplicate++;
+			break;
+		}
+		}
+	return duplicate;
+	}
+
+// Shifts the queue to the left and replaces the last element with a placeholder / empty slot
+void ShiftQueue() {
+	requestQueue[0] = requestQueue[1];
+	requestQueue[1] = requestQueue[2];
+	requestQueue[2] = requestQueue[3];
+	requestQueue[3] = None;
+	queueSize--;
 }
 
 // Get higher speed if distance bigger, lower speed if distance shorter
