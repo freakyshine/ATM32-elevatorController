@@ -63,6 +63,9 @@ LiftPosType ConvertButtonTypeToLiftPosType(ButtonType button);
 // Check if buttons are pressed
 ButtonType CheckKeyEvent();
 
+// Check Buttons for input, if present store to queue. As button is pressed, it will also light up the corresponding indicator
+void CheckButtons ();
+
 // Update the 7-Segment. display
 void UpdateDisplay(LiftPosType elevatorState);
 
@@ -90,18 +93,7 @@ int main(void) {
 
         // Waiting for new floor request
         case Waiting: {
-            // Check all buttons for inputs
-            // EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
-            ButtonType btn = CheckKeyEvent();
-            requestedElevatorPosition = ConvertButtonTypeToLiftPosType(btn);
-            if (btn != EmergencyButton && currentElevatorState != requestedElevatorPosition) {
-                if (btn > 8) {
-                    SetIndicatorFloorState(requestedElevatorPosition);
-                } else {
-                    SetIndicatorElevatorState(requestedElevatorPosition);
-                }
-                state = CloseDoor;
-            }
+            CheckButtons();
             break;
         }
 
@@ -164,6 +156,21 @@ int main(void) {
 /*******************************************************************************
  ***  PRIVATE FUNCTIONs *********************************************************
  *******************************************************************************/
+// Check Buttons for input, if present store to queue. As button is pressed, it will also light up the corresponding indicator
+void CheckButtons () {
+	// EmergencyButton being the first in the enum, and FloorButton_F3 the last => change this if enum in library alters
+	ButtonType btn = CheckKeyEvent();
+	requestedElevatorPosition = ConvertButtonTypeToLiftPosType(btn); // TODO: store to queue instead (another method)
+	if (btn != EmergencyButton && currentElevatorState != requestedElevatorPosition) {
+		if (btn > 8) {
+			SetIndicatorFloorState(requestedElevatorPosition);
+			} else {
+			SetIndicatorElevatorState(requestedElevatorPosition);
+		}
+		state = CloseDoor;
+	}
+}
+
 // Get higher speed if distance bigger, lower speed if distance shorter
 SpeedType GetSpeed(LiftPosType low, LiftPosType high) {
     if (high - low > 2) {
